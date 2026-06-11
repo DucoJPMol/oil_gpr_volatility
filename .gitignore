@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+.DS_Store
+.env
+
+# Raw and processed data are kept in the repo because the files are small.
+# If a data file is ever too large for git, add its path below.
