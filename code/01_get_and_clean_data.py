@@ -124,12 +124,18 @@ def load_gpr_daily() -> pd.Series:
 
 
 def load_gpr_monthly() -> pd.DataFrame:
-    """Monthly GPR plus the Russia country index (Iran is not in this export)."""
+    """Monthly GPR plus the country indices listed in config.GPR_COUNTRIES.
+    Note: the Caldara-Iacoviello country set has no Iran index (no GPRC_IRN);
+    Israel proxies the Iran episodes (see config.GPR_IRAN_PROXY)."""
     path = config.DATA_RAW / config.GPR_MONTHLY_FILE
     df = pd.read_excel(path)
     df["month"] = pd.to_datetime(df["month"], errors="coerce")
     df = df.dropna(subset=["month"]).set_index("month")
-    keep = [c for c in ["GPR", "GPRT", "GPRA", "GPRC_RUS"] if c in df.columns]
+    country_cols = [f"GPRC_{c}" for c in config.GPR_COUNTRIES]
+    keep = [c for c in ["GPR", "GPRT", "GPRA", *country_cols] if c in df.columns]
+    missing = [c for c in country_cols if c not in df.columns]
+    if missing:
+        print(f"  note: country columns not in file and skipped: {missing}")
     out = df[keep].dropna(how="all").sort_index()
     out.columns = [c.lower() for c in out.columns]
     return out

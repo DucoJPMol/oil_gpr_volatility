@@ -43,7 +43,9 @@ REVERT_CONSECUTIVE_DAYS = 5     # vol must stay below the threshold this many da
 # ----------------------------------------------------------------------
 # Data cutoff for the still-running 2026 episode
 # ----------------------------------------------------------------------
-# TODO confirm with the group: set to the last trading day before the final draft.
+# The last full trading week before the final draft (Mon 8 - Fri 12 Jun 2026).
+# Group-locked: change only after telling the group. The 2026 episode is ongoing,
+# so its event window is truncated at this date (handled in 02_event_windows.py).
 DATA_CUTOFF = "2026-06-12"
 
 # ----------------------------------------------------------------------
@@ -64,12 +66,27 @@ GPR_PAGE = "https://www.matteoiacoviello.com/gpr.htm"
 # into data/raw, then write the exact filenames and the download date here.
 GPR_MONTHLY_FILE = "data_gpr_export.xls"
 GPR_DAILY_FILE = "data_gpr_daily_recent.xls"
+GPR_DOWNLOAD_DATE = "2026-06-11"   # version of the GPR files in data/raw (updates monthly)
+
+# ----------------------------------------------------------------------
+# GPR country indices (monthly column GPRC_<code> in the file).
+#
+# Important: the Caldara-Iacoviello country set covers 44 countries and does
+# NOT include Iran (there is no GPRC_IRN), so there is no Iran series to load.
+# For the Iran-centric episodes (2018 JCPOA, 2025 Twelve Day War, 2026 campaign)
+# we use Israel as the closest covered proxy; Russia covers the 2022 episode and
+# Saudi Arabia is the Gulf proxy. The overall daily GPRD is used regardless.
+# ----------------------------------------------------------------------
+GPR_COUNTRIES = ["ISR", "SAU", "RUS", "EGY", "TUR"]   # carried through to the processed panel
+GPR_IRAN_PROXY = "ISR"                                # nearest covered country; no GPRC_IRN exists
 
 # ----------------------------------------------------------------------
 # The five episodes. Dates are calendar dates; the code maps day zero to the
 # first trading day on or after the date.
 #
-# supply_disruption is left blank on purpose. Fill it from your Phase 1
+# "country" is the GPR country index used as the episode's country-level signal
+# (see GPR_COUNTRIES above; Israel proxies the Iran episodes since no GPRC_IRN
+# exists). supply_disruption is left None on purpose: fill it from your Phase 1
 # coding sheet (yes / no / partial) with a source for each, because it is the
 # spine of the headline-versus-disruption argument.
 # ----------------------------------------------------------------------
@@ -77,31 +94,37 @@ TRIGGERS = {
     "gulf_war_1990": {
         "date": "1990-08-02",
         "label": "Gulf War (Iraq invades Kuwait)",
+        "country": "SAU",
         "supply_disruption": None,
     },
     "iran_sanctions_2018": {
         "date": "2018-05-08",
         "label": "US withdrawal from the JCPOA",
+        "country": GPR_IRAN_PROXY,
         "supply_disruption": None,
     },
     "russia_ukraine_2022": {
         "date": "2022-02-24",
         "label": "Russia invades Ukraine",
+        "country": "RUS",
         "supply_disruption": None,
     },
     "twelve_day_war_2025": {
-        "date": "2025-06-13",   # TODO confirm the exact start date
+        "date": "2025-06-13",   # Israel's opening strikes, 13 Jun 2025
         "label": "Twelve Day War (Israel and Iran)",
+        "country": GPR_IRAN_PROXY,
         "supply_disruption": None,
     },
     "iran_2026_campaign": {
         "date": "2026-02-28",   # first strikes, late February 2026
         "label": "2026 Iran campaign begins",
+        "country": GPR_IRAN_PROXY,
         "supply_disruption": None,
     },
     "iran_2026_closure": {
         "date": "2026-03-04",   # Strait of Hormuz declared closed
         "label": "Strait of Hormuz closure declared",
+        "country": GPR_IRAN_PROXY,
         "supply_disruption": None,
     },
 }
@@ -127,9 +150,12 @@ def summary():
     print()
     print(f"Data cutoff (2026): {DATA_CUTOFF}")
     print()
+    print(f"GPR files dated {GPR_DOWNLOAD_DATE}; country indices {GPR_COUNTRIES} "
+          f"(Iran proxy: {GPR_IRAN_PROXY}, no GPRC_IRN exists)")
+    print()
     print(f"Episodes ({len(TRIGGERS)})")
     for key, t in TRIGGERS.items():
-        print(f"  {t['date']}  {t['label']}")
+        print(f"  {t['date']}  {t['label']:42s} country={t['country']}")
 
 
 if __name__ == "__main__":

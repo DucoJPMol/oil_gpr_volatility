@@ -37,6 +37,8 @@ Record the download date next to each, since some of these update over time.
 
 After downloading the GPR files, write their exact filenames into `code/config.py` (the `GPR_MONTHLY_FILE` and `GPR_DAILY_FILE` lines).
 
+**Country indices and Iran.** The Caldara–Iacoviello country set covers 44 countries and does **not** include Iran (there is no `GPRC_IRN`, and the daily file has no country breakdown). The Iran-centric episodes (2018 JCPOA, 2025 Twelve-Day War, 2026 campaign) therefore use **Israel (`GPRC_ISR`)** as the closest covered proxy, alongside the overall daily `GPRD`. The country indices carried through the pipeline are set in `config.GPR_COUNTRIES` (`ISR, SAU, RUS, EGY, TUR`) and the Iran proxy in `config.GPR_IRAN_PROXY`.
+
 ## Run order
 1. `code/00_check_setup.py` checks the environment and folders.
 2. `code/01_get_and_clean_data.py` pulls the FRED data (straight from FRED's CSV endpoint, no API key), loads the GPR files, builds returns and the 21-day annualised volatility, and saves to `data/processed`. Re-runs use the cached pulls in `data/raw`; pass `--refresh` to force a fresh download.
