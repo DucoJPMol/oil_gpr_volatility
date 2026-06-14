@@ -39,8 +39,8 @@ After downloading the GPR files, write their exact filenames into `code/config.p
 
 ## Run order
 1. `code/00_check_setup.py` checks the environment and folders.
-2. `code/01_get_and_clean_data.py` pulls the FRED data, loads the GPR files, builds returns and the 21-day annualised volatility, and saves to `data/processed`. (next to be written)
-3. `code/02_event_windows.py` builds the event panel for the five episodes.
+2. `code/01_get_and_clean_data.py` pulls the FRED data (straight from FRED's CSV endpoint, no API key), loads the GPR files, builds returns and the 21-day annualised volatility, and saves to `data/processed`. Re-runs use the cached pulls in `data/raw`; pass `--refresh` to force a fresh download.
+3. `code/02_event_windows.py` builds the event panel and pre-event baselines for the episodes.
 4. `code/03_persistence.py` computes days-to-revert and fits the GARCH model.
 5. `code/04_regressions.py` runs the supporting regressions.
 6. `code/05_figures.py` and `code/06_tables.py` export the figures and tables.

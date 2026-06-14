@@ -62,8 +62,8 @@ FRED_SERIES = {
 GPR_PAGE = "https://www.matteoiacoviello.com/gpr.htm"
 # Download both the monthly file and the daily file from that page, save them
 # into data/raw, then write the exact filenames and the download date here.
-GPR_MONTHLY_FILE = ""   # e.g. "data_gpr_export.xls"        (fill in once downloaded)
-GPR_DAILY_FILE = ""     # e.g. "data_gpr_daily_recent.xls"  (fill in once downloaded)
+GPR_MONTHLY_FILE = "data_gpr_export.xls"
+GPR_DAILY_FILE = "data_gpr_daily_recent.xls"
 
 # ----------------------------------------------------------------------
 # The five episodes. Dates are calendar dates; the code maps day zero to the
