@@ -38,11 +38,51 @@ import config
 
 
 FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv"
-START = "1985-01-01"   # well before the 1990 Gulf War; FRED trims to each series' real start
-# FRED sits behind a WAF that blocks the default python-requests user-agent on
-# larger queries, so we present a browser one.
+EIA_DATA_URL = "https://api.eia.gov/v2/petroleum/pri/spt/data/"
+START = "1985-01-01"   # well before the 1990 Gulf War; the source trims to each series' real start
+# Present a browser user-agent; FRED's WAF blocks the default python-requests one.
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                          "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"}
+
+
+# ----------------------------------------------------------------------
+# Phase 1: pull the oil prices from the EIA v2 API
+# ----------------------------------------------------------------------
+def fetch_eia(series_id: str, start: str = START, end: str | None = None) -> pd.Series:
+    """Download one EIA daily spot-price series (e.g. RBRTE, RWTC) as a dated
+    pandas Series. The v2 API returns at most 5000 rows per call, so we page
+    through with offset until a short page comes back."""
+    if not config.EIA_API_KEY:
+        sys.exit("EIA_API_KEY is not set. Get a free key at "
+                 "https://www.eia.gov/opendata/register.php, then run:\n"
+                 "    export EIA_API_KEY=your_key_here")
+    end = end or date.today().isoformat()
+    rows, offset, length = [], 0, 5000
+    while True:
+        params = {
+            "api_key": config.EIA_API_KEY,
+            "frequency": "daily",
+            "data[0]": "value",
+            "facets[series][]": series_id,
+            "start": start, "end": end,
+            "sort[0][column]": "period",
+            "sort[0][direction]": "asc",
+            "offset": offset, "length": length,
+        }
+        r = requests.get(EIA_DATA_URL, params=params, headers=HEADERS, timeout=60)
+        if r.status_code == 403:
+            sys.exit("EIA returned 403 (invalid or missing API key). Check $EIA_API_KEY.")
+        r.raise_for_status()
+        page = r.json()["response"]["data"]
+        rows.extend(page)
+        if len(page) < length:
+            break
+        offset += length
+    s = pd.Series(
+        {pd.Timestamp(d["period"]): d["value"] for d in rows},
+        dtype="float64", name=series_id,
+    )
+    return pd.to_numeric(s, errors="coerce").dropna().sort_index()
 
 
 # ----------------------------------------------------------------------
@@ -88,24 +128,46 @@ def fetch_fred(series_id: str, start: str = START, end: str | None = None) -> pd
     return s[~s.index.duplicated(keep="last")].sort_index()
 
 
+def _report(name: str, series_id: str, s: pd.Series, src: str) -> None:
+    print(f"  {name:6s} {series_id:14s} {len(s):>6d} obs  "
+          f"{s.index.min().date()} to {s.index.max().date()}  ({src})")
+
+
 def get_oil_and_vol(refresh: bool = False) -> dict[str, pd.Series]:
-    """Return every FRED series in the config. Loads a cached raw pull from
-    data/raw if present (so a flaky network does not block a re-run); pass
-    refresh=True (or `--refresh` on the command line) to force a fresh download."""
+    """Oil prices (Brent, WTI) from EIA; volatility indices (OVX, VIX) from FRED.
+    Cached raw pulls in data/raw are reused unless refresh=True (`--refresh`).
+    OVX/VIX are best-effort: if FRED is unreachable, they are skipped with a
+    warning and the realized-vol pipeline runs without them."""
     out = {}
-    print("Phase 1: FRED series")
+
+    print("Phase 1: EIA oil prices")
+    for name, series_id in config.EIA_SERIES.items():
+        raw_path = config.DATA_RAW / f"raw_eia_{name}.csv"
+        if raw_path.exists() and not refresh:
+            s = pd.read_csv(raw_path, index_col=0, parse_dates=True).iloc[:, 0]
+            src = "cached"
+        else:
+            s = fetch_eia(series_id, end=config.DATA_CUTOFF)
+            s.to_csv(raw_path, header=[series_id])
+            src = f"downloaded {date.today().isoformat()}"
+        _report(name, series_id, s, src)
+        out[name] = s.rename(name)
+
+    print("FRED volatility indices (cross-check; skipped if FRED is unreachable)")
     for name, series_id in config.FRED_SERIES.items():
         raw_path = config.DATA_RAW / f"raw_fred_{name}.csv"
         if raw_path.exists() and not refresh:
             s = _parse_fred_csv(raw_path.read_text(), series_id)
-            src = "cached"
-        else:
+            _report(name, series_id, s, "cached")
+            out[name] = s.rename(name)
+            continue
+        try:
             s = fetch_fred(series_id, end=config.DATA_CUTOFF)
             s.to_csv(raw_path, header=[series_id])
-            src = f"downloaded {date.today().isoformat()}"
-        print(f"  {name:6s} {series_id:14s} {len(s):>6d} obs  "
-              f"{s.index.min().date()} to {s.index.max().date()}  ({src})")
-        out[name] = s.rename(name)
+            _report(name, series_id, s, f"downloaded {date.today().isoformat()}")
+            out[name] = s.rename(name)
+        except Exception as e:                       # noqa: BLE001
+            print(f"  {name:6s} {series_id:14s} skipped (FRED unreachable: {type(e).__name__})")
     print()
     return out
 
@@ -168,8 +230,16 @@ def build_panel(fred: dict[str, pd.Series], gprd: pd.Series) -> pd.DataFrame:
     print("Phase 2: building the core daily series")
 
     # Outer join keeps every date any series has data, so we can see coverage.
-    panel = pd.concat([fred["brent"], fred["wti"], fred["ovx"], fred["vix"], gprd],
-                      axis=1).sort_index()
+    # OVX/VIX may be absent (FRED unreachable); add them as empty columns so the
+    # downstream scripts always find the expected column names.
+    series = [fred["brent"], fred["wti"]]
+    for opt in ["ovx", "vix"]:
+        series.append(fred[opt] if opt in fred else pd.Series(dtype="float64", name=opt))
+    series.append(gprd)
+    panel = pd.concat(series, axis=1).sort_index()
+    for opt in ["ovx", "vix"]:
+        if opt not in panel.columns:
+            panel[opt] = np.nan
 
     # Returns and realized vol are computed on each price's own trading days.
     panel["brent_ret"] = log_returns(panel["brent"])

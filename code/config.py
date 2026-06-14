@@ -7,6 +7,7 @@ Project: Headlines or Disruption? Geopolitical Risk and the Persistence
 of Oil Price Volatility, 1990 to 2026.
 """
 
+import os
 from pathlib import Path
 
 # ----------------------------------------------------------------------
@@ -49,11 +50,22 @@ REVERT_CONSECUTIVE_DAYS = 5     # vol must stay below the threshold this many da
 DATA_CUTOFF = "2026-06-12"
 
 # ----------------------------------------------------------------------
-# FRED series IDs (used with pandas-datareader, which needs no API key)
+# Oil prices: EIA is the primary source. FRED's Brent (DCOILBRENTEU) is itself
+# EIA series RBRTE, so this is the same data, and EIA stays reachable on networks
+# that block FRED. Get a free key in seconds at
+#   https://www.eia.gov/opendata/register.php
+# then export it before running the pipeline:
+#   export EIA_API_KEY=your_key_here
 # ----------------------------------------------------------------------
+EIA_API_KEY = os.environ.get("EIA_API_KEY", "")
+EIA_SERIES = {
+    "brent": "RBRTE",   # Europe Brent Spot Price FOB, daily, from 1987
+    "wti":   "RWTC",    # Cushing WTI Spot Price FOB, daily, from 1986
+}
+
+# Volatility indices come from FRED (CBOE indices, not on EIA). These are a
+# secondary cross-check, so the pipeline still runs if FRED is unreachable.
 FRED_SERIES = {
-    "brent": "DCOILBRENTEU",   # Brent spot, daily, from 1987
-    "wti":   "DCOILWTICO",     # WTI spot, daily, from 1986
     "ovx":   "OVXCLS",         # crude oil volatility index, daily, from 2007
     "vix":   "VIXCLS",         # equity volatility index (optional comparator)
 }

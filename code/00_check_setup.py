@@ -60,6 +60,12 @@ def check_config():
         print("  ok       config.py loaded")
         print(f"  cutoff   {config.DATA_CUTOFF}")
         print(f"  episodes {len(config.TRIGGERS)}")
+        if config.EIA_API_KEY:
+            print("  ok       EIA_API_KEY is set")
+        else:
+            print("  MISSING  EIA_API_KEY (oil prices come from EIA). Get a free key at")
+            print("           https://www.eia.gov/opendata/register.php then run:")
+            print("           export EIA_API_KEY=your_key_here")
     except Exception as e:
         print(f"  problem loading config.py: {e}")
     print()

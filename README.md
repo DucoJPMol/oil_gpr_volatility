@@ -11,7 +11,8 @@ It pulls oil prices and a geopolitical risk index, builds a daily volatility ser
    - macOS or Linux: `python -m venv .venv && source .venv/bin/activate`
    - Windows: `python -m venv .venv` then `.venv\Scripts\activate`
 3. Install the packages: `pip install -r requirements.txt`
-4. Run the setup check: `python code/00_check_setup.py`
+4. Get a free EIA API key (instant) at <https://www.eia.gov/opendata/register.php> and export it: `export EIA_API_KEY=your_key_here`
+5. Run the setup check: `python code/00_check_setup.py`
 
 ## Folder structure
 - `code/` all scripts and `config.py`
@@ -26,10 +27,18 @@ Record the download date next to each, since some of these update over time.
 
 | Series | Source | How to get it | Downloaded on |
 |---|---|---|---|
-| Brent spot (daily) | FRED `DCOILBRENTEU` | pulled by the code, no API key | (auto) |
-| WTI spot (daily) | FRED `DCOILWTICO` | pulled by the code | (auto) |
-| OVX, oil volatility | FRED `OVXCLS` | pulled by the code | (auto) |
-| VIX (optional) | FRED `VIXCLS` | pulled by the code | (auto) |
+| Brent spot (daily) | EIA `RBRTE` | pulled by the code (needs a free EIA key) | (auto) |
+| WTI spot (daily) | EIA `RWTC` | pulled by the code | (auto) |
+| OVX, oil volatility | FRED `OVXCLS` | pulled by the code (best-effort; skipped if FRED is unreachable) | (auto) |
+| VIX (optional) | FRED `VIXCLS` | pulled by the code (best-effort) | (auto) |
+
+Oil prices come from **EIA**, not FRED: FRED's Brent series `DCOILBRENTEU` is itself EIA series `RBRTE`, so the data is identical, and EIA stays reachable on networks that block FRED. Get a free key (instant) at <https://www.eia.gov/opendata/register.php> and export it before running the pipeline:
+
+```bash
+export EIA_API_KEY=your_key_here
+```
+
+OVX and VIX are CBOE indices available only on FRED; they are a secondary cross-check, so the pipeline still runs (without them) if FRED is blocked.
 | GPR monthly | Caldara and Iacoviello | download by hand from matteoiacoviello.com/gpr.htm into `data/raw` | __fill in__ |
 | GPR daily (GPRD) | Caldara and Iacoviello | download by hand from the same page into `data/raw` | __fill in__ |
 | OPEC spare capacity | EIA Short-Term Energy Outlook | download by hand | __fill in__ |
