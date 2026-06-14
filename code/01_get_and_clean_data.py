@@ -95,13 +95,14 @@ def _parse_fred_csv(text: str, series_id: str) -> pd.Series:
     return df.set_index("date")[series_id].dropna()
 
 
-def _fetch_chunk(series_id: str, start: str, end: str, retries: int = 4) -> pd.Series:
+def _fetch_chunk(series_id: str, start: str, end: str,
+                 retries: int = 4, timeout: int = 120) -> pd.Series:
     """One FRED CSV request for a date range, with retries on timeout/WAF."""
     params = {"id": series_id, "cosd": start, "coed": end}
     last = None
     for attempt in range(1, retries + 1):
         try:
-            r = requests.get(FRED_CSV, params=params, headers=HEADERS, timeout=120)
+            r = requests.get(FRED_CSV, params=params, headers=HEADERS, timeout=timeout)
             r.raise_for_status()
             if r.text.lstrip().startswith("<"):      # WAF/HTML challenge, not CSV
                 raise ValueError("non-CSV response (WAF challenge / rate limit)")
@@ -113,17 +114,20 @@ def _fetch_chunk(series_id: str, start: str, end: str, retries: int = 4) -> pd.S
     raise RuntimeError(f"FRED fetch failed for {series_id} {start}..{end}: {last}")
 
 
-def fetch_fred(series_id: str, start: str = START, end: str | None = None) -> pd.Series:
+def fetch_fred(series_id: str, start: str = START, end: str | None = None,
+               retries: int = 4, timeout: int = 120) -> pd.Series:
     """Download one FRED series as a dated pandas Series. Fetched in ~5-year
     chunks because FRED's gateway times out generating very long daily ranges;
-    smaller windows return quickly and are concatenated. Missing days are '.'
-    in the CSV and are dropped (we keep only real trading-day observations)."""
+    smaller windows return quickly and are concatenated. The first failing chunk
+    aborts the whole fetch (so a blocked FRED gives up fast with low retries).
+    Missing days are '.' in the CSV and are dropped (real trading days only)."""
     end = end or date.today().isoformat()
     edges = pd.date_range(start=start, end=end, freq="5YS").union(
         pd.DatetimeIndex([start, end]))
     parts = []
     for lo, hi in zip(edges[:-1], edges[1:]):
-        parts.append(_fetch_chunk(series_id, lo.date().isoformat(), hi.date().isoformat()))
+        parts.append(_fetch_chunk(series_id, lo.date().isoformat(), hi.date().isoformat(),
+                                  retries=retries, timeout=timeout))
     s = pd.concat(parts)
     return s[~s.index.duplicated(keep="last")].sort_index()
 
@@ -144,7 +148,8 @@ def get_oil_and_vol(refresh: bool = False) -> dict[str, pd.Series]:
     for name, series_id in config.EIA_SERIES.items():
         raw_path = config.DATA_RAW / f"raw_eia_{name}.csv"
         if raw_path.exists() and not refresh:
-            s = pd.read_csv(raw_path, index_col=0, parse_dates=True).iloc[:, 0]
+            s = pd.read_csv(raw_path, index_col=0).iloc[:, 0]
+            s.index = pd.to_datetime(s.index)
             src = "cached"
         else:
             s = fetch_eia(series_id, end=config.DATA_CUTOFF)
@@ -162,7 +167,8 @@ def get_oil_and_vol(refresh: bool = False) -> dict[str, pd.Series]:
             out[name] = s.rename(name)
             continue
         try:
-            s = fetch_fred(series_id, end=config.DATA_CUTOFF)
+            # Quick-fail (short timeout, one try) so a blocked FRED skips fast.
+            s = fetch_fred(series_id, end=config.DATA_CUTOFF, retries=1, timeout=15)
             s.to_csv(raw_path, header=[series_id])
             _report(name, series_id, s, f"downloaded {date.today().isoformat()}")
             out[name] = s.rename(name)
@@ -207,8 +213,12 @@ def load_gpr_monthly() -> pd.DataFrame:
 # Phase 2: returns and realized volatility
 # ----------------------------------------------------------------------
 def log_returns(price: pd.Series) -> pd.Series:
-    """Daily log returns r = ln(P_t / P_{t-1}) on actual trading days only."""
-    return np.log(price / price.shift(1))
+    """Daily log returns r = ln(P_t / P_{t-1}) on actual trading days only.
+    Must be passed a price series indexed by its own trading days (not the
+    merged calendar), so shift(1) is the previous trading day. Non-positive
+    prices (WTI on 2020-04-20) make the log undefined and yield NaN there."""
+    p = price.where(price > 0)
+    return np.log(p / p.shift(1))
 
 
 def realized_vol(returns: pd.Series) -> pd.Series:
@@ -229,29 +239,36 @@ def build_panel(fred: dict[str, pd.Series], gprd: pd.Series) -> pd.DataFrame:
     """Merge all daily series on an outer join, then add returns and vol."""
     print("Phase 2: building the core daily series")
 
-    # Outer join keeps every date any series has data, so we can see coverage.
-    # OVX/VIX may be absent (FRED unreachable); add them as empty columns so the
-    # downstream scripts always find the expected column names.
-    series = [fred["brent"], fred["wti"]]
+    # Compute returns and realized vol on each price's OWN trading-day index,
+    # so shift(1) is the previous trading day (not the previous calendar day,
+    # which would lose every Monday across the weekend gap once GPRD's
+    # every-calendar-day index is merged in).
+    cols = {
+        "brent": fred["brent"],
+        "wti": fred["wti"],
+        "brent_ret": log_returns(fred["brent"]),
+        "wti_ret": log_returns(fred["wti"]),
+        "brent_vol": realized_vol(log_returns(fred["brent"])),
+        "wti_vol": realized_vol(log_returns(fred["wti"])),
+    }
     for opt in ["ovx", "vix"]:
-        series.append(fred[opt] if opt in fred else pd.Series(dtype="float64", name=opt))
-    series.append(gprd)
-    panel = pd.concat(series, axis=1).sort_index()
-    for opt in ["ovx", "vix"]:
-        if opt not in panel.columns:
-            panel[opt] = np.nan
+        if opt in fred:
+            cols[opt] = fred[opt]
+    cols["gprd"] = gprd
 
-    # Returns and realized vol are computed on each price's own trading days.
-    panel["brent_ret"] = log_returns(panel["brent"])
-    panel["wti_ret"] = log_returns(panel["wti"])
-    panel["brent_vol"] = realized_vol(panel["brent_ret"])
-    panel["wti_vol"] = realized_vol(panel["wti_ret"])
+    # Outer join keeps every date any series has data, so we can see coverage.
+    panel = pd.concat(cols, axis=1)
+    panel.index = pd.to_datetime(panel.index)
+    panel = panel.sort_index()
+    for opt in ["ovx", "vix"]:
+        if opt not in panel.columns:   # FRED unreachable: keep the column, all NaN
+            panel[opt] = np.nan
 
     # Standardise GPRD over the full sample for the regressions.
     panel["gprd_z"] = zscore(panel["gprd"])
 
     # Respect the agreed data cutoff for the still-running 2026 episode.
-    panel = panel.loc[:config.DATA_CUTOFF]
+    panel = panel.loc[:pd.Timestamp(config.DATA_CUTOFF)]
     panel.index.name = "date"
     return panel
 
@@ -268,12 +285,14 @@ def sanity_checks(panel: pd.DataFrame) -> None:
         print(f"  {col:9s} n={len(v):>6d}  mean={v.mean():6.2f}%  "
               f"min={v.min():5.2f}%  max={v.max():6.2f}%")
 
-    # Hand-verify one realized-vol value against a direct numpy computation.
+    # Hand-verify the last realized-vol value: std of the final 21 trading-day
+    # returns (use the trading-day series, not the merged calendar, so weekends
+    # are not counted as rows).
     v = panel["brent_vol"].dropna()
     if len(v):
         ts = v.index[-1]
-        loc = panel.index.get_loc(ts)
-        window = panel["brent_ret"].iloc[loc - config.VOL_WINDOW + 1: loc + 1]
+        ret_td = panel["brent_ret"].dropna()
+        window = ret_td.loc[:ts].iloc[-config.VOL_WINDOW:]
         manual = window.std() * np.sqrt(config.TRADING_DAYS_PER_YEAR) * 100.0
         print(f"  hand-check brent_vol on {ts.date()}: "
               f"code={v.iloc[-1]:.4f}  manual={manual:.4f}  "

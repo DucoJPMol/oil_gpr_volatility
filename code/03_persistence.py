@@ -48,17 +48,28 @@ def load_inputs():
 # Metric 1: days to revert
 # ----------------------------------------------------------------------
 def days_to_revert(vol_after: pd.Series, threshold: float,
-                   consec: int) -> tuple[int | None, bool]:
+                   consec: int) -> tuple[int, bool, int]:
     """vol_after is Brent realized vol on trading days from day zero (offset 0)
-    onward. Return (offset of the first day that begins a run of `consec`
-    consecutive days below threshold, censored_flag). If no such run exists,
-    return (last available offset, True) to mark it as still elevated."""
-    below = (vol_after < threshold).to_numpy()
+    onward. Returns (days_to_revert, censored, spike_onset).
+
+    Because the 21-day realized vol is backward-looking, at the trigger day it
+    still reflects the calm pre-event period and can sit below the threshold, so
+    we must not count that as "reverted". We first find the spike onset (the
+    first day at/after day zero on which vol crosses the threshold), then the
+    first day from there that begins a run of `consec` consecutive days below it.
+    If vol never crosses the threshold, the episode did not spike above it
+    (days_to_revert = 0). If it crosses but never settles back, return the last
+    available offset with censored=True (still elevated at the cutoff)."""
+    above = (vol_after >= threshold).to_numpy()
+    below = ~above
     n = len(below)
-    for i in range(n - consec + 1):
+    if not above.any():
+        return 0, False, -1          # never exceeded the threshold; no spike to persist
+    onset = int(above.argmax())      # first day vol crosses above the threshold
+    for i in range(onset, n - consec + 1):
         if below[i:i + consec].all():
-            return i, False          # offset i (trading days after day zero)
-    return n - 1, True               # never reverted within the available data
+            return i, False, onset   # offset i (trading days after day zero)
+    return n - 1, True, onset        # crossed but never settled within the data
 
 
 def metric1(panel: pd.DataFrame, baselines: pd.DataFrame) -> pd.DataFrame:
@@ -73,17 +84,24 @@ def metric1(panel: pd.DataFrame, baselines: pd.DataFrame) -> pd.DataFrame:
             continue
         z = cal.get_loc(d0)
         vol_after = panel.loc[cal[z:], "brent_vol"].dropna()
-        offset, censored = days_to_revert(
+        offset, censored, onset = days_to_revert(
             vol_after, b["revert_threshold"], config.REVERT_CONSECUTIVE_DAYS)
+        spiked = onset >= 0
         rows.append({
             "episode": b["episode"],
             "label": b["label"],
             "day_zero": d0.date().isoformat(),
             "threshold_vol": round(b["revert_threshold"], 2),
+            "spike_onset_day": onset if spiked else None,
             "days_to_revert": offset,
             "censored": censored,
         })
-        tag = f">= {offset} (still elevated at cutoff)" if censored else f"{offset}"
+        if not spiked:
+            tag = "0 (vol never crossed the threshold)"
+        elif censored:
+            tag = f">= {offset} (still elevated at cutoff; spike onset day {onset})"
+        else:
+            tag = f"{offset} (spike onset day {onset})"
         print(f"  {b['episode']:22s} days_to_revert = {tag}")
     return pd.DataFrame(rows)
 
