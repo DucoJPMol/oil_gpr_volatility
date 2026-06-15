@@ -98,46 +98,57 @@ GPR_IRAN_PROXY = "ISR"                                # nearest covered country;
 #
 # "country" is the GPR country index used as the episode's country-level signal
 # (see GPR_COUNTRIES above; Israel proxies the Iran episodes since no GPRC_IRN
-# exists). supply_disruption is left None on purpose: fill it from your Phase 1
-# coding sheet (yes / no / partial) with a source for each, because it is the
-# spine of the headline-versus-disruption argument.
+# exists).
+#
+# The mechanism coding (spine of the headline-versus-disruption argument):
+#   strait_disrupted   was the Strait of Hormuz physically closed/disrupted?
+#   supply_disruption  were barrels actually lost / was physical supply hit?
+# Both are yes / partial / no. Values below are a historically grounded best
+# estimate -- ATTACH A SOURCE FOR EACH (grading + replicability). The 2026 rows
+# are recent/scenario-specific and must be verified before the final draft.
 # ----------------------------------------------------------------------
 TRIGGERS = {
     "gulf_war_1990": {
         "date": "1990-08-02",
         "label": "Gulf War (Iraq invades Kuwait)",
         "country": "SAU",
-        "supply_disruption": None,
+        "strait_disrupted": "no",      # Strait stayed open
+        "supply_disruption": "yes",    # ~4 Mb/d Iraqi+Kuwaiti exports removed
     },
     "iran_sanctions_2018": {
         "date": "2018-05-08",
         "label": "US withdrawal from the JCPOA",
         "country": GPR_IRAN_PROXY,
-        "supply_disruption": None,
+        "strait_disrupted": "no",      # the "Strait open" contrast
+        "supply_disruption": "no",     # gradual sanctions only; no in-window loss
     },
     "russia_ukraine_2022": {
         "date": "2022-02-24",
         "label": "Russia invades Ukraine",
         "country": "RUS",
-        "supply_disruption": None,
+        "strait_disrupted": "no",       # not a Hormuz event
+        "supply_disruption": "partial", # Russian flows sanctioned, largely redirected
     },
     "twelve_day_war_2025": {
         "date": "2025-06-13",   # Israel's opening strikes, 13 Jun 2025
         "label": "Twelve Day War (Israel and Iran)",
         "country": GPR_IRAN_PROXY,
-        "supply_disruption": None,
+        "strait_disrupted": "no",      # threatened but stayed open
+        "supply_disruption": "no",     # no sustained physical loss (the headline)
     },
     "iran_2026_campaign": {
         "date": "2026-02-28",   # first strikes, late February 2026
         "label": "2026 Iran campaign begins",
         "country": GPR_IRAN_PROXY,
-        "supply_disruption": None,
+        "strait_disrupted": "partial",  # escalating strikes; VERIFY
+        "supply_disruption": "partial", # escalating disruption; VERIFY
     },
     "iran_2026_closure": {
         "date": "2026-03-04",   # Strait of Hormuz declared closed
         "label": "Strait of Hormuz closure declared",
         "country": GPR_IRAN_PROXY,
-        "supply_disruption": None,
+        "strait_disrupted": "yes",     # closure declared; VERIFY
+        "supply_disruption": "yes",    # ~20% of seaborne oil blocked; VERIFY
     },
 }
 

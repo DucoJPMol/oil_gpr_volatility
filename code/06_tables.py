@@ -79,8 +79,9 @@ def table2_event_summary(event: pd.DataFrame, base: pd.DataFrame) -> pd.DataFram
             "peak_vol_%": round(peak_vol, 1),
             "peak_day": peak_day,
             "days_to_revert": (f">={int(days)}" if censored else int(days)),
+            "strait_disrupted": config.TRIGGERS[key]["strait_disrupted"],
+            "supply_disruption": config.TRIGGERS[key]["supply_disruption"],
             "country_index": config.TRIGGERS[key]["country"],
-            "strait_disrupted": config.TRIGGERS[key]["supply_disruption"],
         })
     return pd.DataFrame(rows)
 

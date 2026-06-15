@@ -215,6 +215,42 @@ def figure7():
     save(fig, 7, "local_projection_irf")
 
 
+def figure8():
+    """Days-to-revert by episode, coloured by supply disruption (the mechanism)."""
+    dr_path = config.TABLES / "table2_days_to_revert.csv"
+    if not dr_path.exists():
+        print("  fig8 skipped (run 03_persistence.py first)")
+        return
+    dr = pd.read_csv(dr_path).set_index("episode")
+    dcolor = {"yes": "#c43e3e", "partial": "#e8a33d", "no": "#3a7d44"}
+    keys = [k for k in EPISODE_STYLE if k in dr.index]
+    vals = [dr.loc[k, "days_to_revert"] for k in keys]
+    disrupt = [config.TRIGGERS[k]["supply_disruption"] for k in keys]
+    colors = [dcolor.get(d, "0.6") for d in disrupt]
+    labels = [EPISODE_STYLE[k][1] for k in keys]
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    bars = ax.bar(range(len(keys)), vals, color=colors,
+                  hatch=["//" if dr.loc[k, "censored"] else "" for k in keys])
+    ax.set_xticks(range(len(keys)))
+    ax.set_xticklabels(labels, rotation=20, ha="right", fontsize=9)
+    ax.set_ylabel("Days to revert (trading days)")
+    ax.set_title("Volatility persistence by episode, coloured by supply disruption")
+    for b, k in zip(bars, keys):
+        tag = f"≥{int(dr.loc[k,'days_to_revert'])}" if dr.loc[k, "censored"] else int(dr.loc[k, "days_to_revert"])
+        ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 2, str(tag),
+                ha="center", fontsize=9)
+    handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in dcolor.values()]
+    leg1 = ax.legend(handles, [f"supply disruption: {k}" for k in dcolor],
+                     loc="upper right", fontsize=9)
+    ax.add_artist(leg1)
+    ax.bar(0, 0, color="white", edgecolor="0.4", hatch="//", label="still elevated at cutoff")
+    ax.legend(loc="upper center", fontsize=8, frameon=True,
+              handles=[plt.Rectangle((0, 0), 1, 1, facecolor="white", edgecolor="0.4", hatch="//")],
+              labels=["still elevated at cutoff (hatched)"])
+    save(fig, 8, "days_to_revert_by_disruption")
+
+
 def main():
     config.FIGURES.mkdir(parents=True, exist_ok=True)
     panel, event, base, cond = load()
@@ -226,6 +262,7 @@ def main():
     figure5(event)
     figure6(panel, cond, base)
     figure7()
+    figure8()
     print(f"Done. Figures in {config.FIGURES.relative_to(config.PROJECT_ROOT)}/")
 
 
