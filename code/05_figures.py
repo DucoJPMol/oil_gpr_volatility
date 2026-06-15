@@ -160,6 +160,27 @@ def figure4(event):
     save(fig, 4, "2025_vs_2026")
 
 
+def figure5(event):
+    """Small multiples: GPRD vs realized vol within each episode's window."""
+    keys = list(EPISODE_STYLE.keys())
+    fig, axes = plt.subplots(2, 3, figsize=(13, 7.5), sharex=True)
+    for ax, key in zip(axes.ravel(), keys):
+        color, label = EPISODE_STYLE[key]
+        g = event[event["episode"] == key]
+        ax.plot(g["event_day"], g["brent_vol"], color=color, lw=1.6)
+        ax.set_title(label, fontsize=10)
+        ax.axvline(0, color="0.5", lw=0.8, ls=":")
+        ax2 = ax.twinx()
+        ax2.plot(g["event_day"], g["gprd"], color="0.45", lw=1.0, ls="--")
+        ax2.grid(False)
+        ax2.tick_params(labelsize=8)
+        ax.tick_params(labelsize=8)
+    fig.supxlabel("Event time (trading days; 0 = trigger)")
+    fig.supylabel("Realized vol (%, annualised) — solid")
+    fig.suptitle("Realized volatility (coloured) and GPRD (grey dashed) by episode", y=0.99)
+    save(fig, 5, "small_multiples_vol_gprd")
+
+
 def figure6(panel, cond, base):
     """GARCH(1,1) conditional volatility over the sample, vs realized vol."""
     vol = panel.loc["1990":, "brent_vol"].dropna()
@@ -202,6 +223,7 @@ def main():
     figure2(panel, base)
     figure3(event, base)
     figure4(event)
+    figure5(event)
     figure6(panel, cond, base)
     figure7()
     print(f"Done. Figures in {config.FIGURES.relative_to(config.PROJECT_ROOT)}/")

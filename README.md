@@ -49,12 +49,16 @@ After downloading the GPR files, write their exact filenames into `code/config.p
 **Country indices and Iran.** The Caldara–Iacoviello country set covers 44 countries and does **not** include Iran (there is no `GPRC_IRN`, and the daily file has no country breakdown). The Iran-centric episodes (2018 JCPOA, 2025 Twelve-Day War, 2026 campaign) therefore use **Israel (`GPRC_ISR`)** as the closest covered proxy, alongside the overall daily `GPRD`. The country indices carried through the pipeline are set in `config.GPR_COUNTRIES` (`ISR, SAU, RUS, EGY, TUR`) and the Iran proxy in `config.GPR_IRAN_PROXY`.
 
 ## Run order
-1. `code/00_check_setup.py` checks the environment and folders.
-2. `code/01_get_and_clean_data.py` pulls the FRED data (straight from FRED's CSV endpoint, no API key), loads the GPR files, builds returns and the 21-day annualised volatility, and saves to `data/processed`. Re-runs use the cached pulls in `data/raw`; pass `--refresh` to force a fresh download.
-3. `code/02_event_windows.py` builds the event panel and pre-event baselines for the episodes.
-4. `code/03_persistence.py` computes days-to-revert and fits the GARCH model.
-5. `code/04_regressions.py` runs the supporting regressions.
-6. `code/05_figures.py` and `code/06_tables.py` export the figures and tables.
+Set `EIA_API_KEY` first (see Setup), then run in order:
+1. `code/00_check_setup.py` — checks the environment, folders, and the EIA key.
+2. `code/01_get_and_clean_data.py` — pulls Brent/WTI from the EIA API, loads the GPR files, builds returns and the 21-day annualised volatility, and saves to `data/processed`. OVX/VIX are a best-effort FRED pull (skipped if FRED is unreachable). Re-runs use the cached pulls in `data/raw`; pass `--refresh` to force a fresh download.
+3. `code/02_event_windows.py` — builds the event panel and pre-event baselines.
+4. `code/03_persistence.py` — days-to-revert (Table 2) and GARCH(1,1) (Table 3).
+5. `code/04_regressions.py` — correlations, the pooled event-window regression, and the local projection (Table 4).
+6. `code/05_figures.py` — Figures 1–7. `code/06_tables.py` — Tables 1–3.
+7. `code/07_robustness.py` — days-to-revert across Brent/WTI and 10/21/30-day vol windows (Table 5).
+
+A plain-language summary of the results for the write-up is in `output/results_summary.md`.
 
 ## File-naming convention
 - Raw: `raw_<source>_<series>.csv`, for example `raw_fred_brent.csv`
