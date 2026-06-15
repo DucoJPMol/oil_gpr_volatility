@@ -1,0 +1,7 @@
+            episode                             label trigger_date   day_zero  baseline_vol_%  peak_vol_%  peak_day days_to_revert country_index strait_disrupted
+      gulf_war_1990    Gulf War (Iraq invades Kuwait)   1990-08-02 1990-08-02            34.6       102.9        60            178           SAU             None
+iran_sanctions_2018      US withdrawal from the JCPOA   2018-05-08 2018-05-08            25.6        37.6        48              2           ISR             None
+russia_ukraine_2022            Russia invades Ukraine   2022-02-24 2022-02-24            36.9        90.5        22             61           RUS             None
+twelve_day_war_2025  Twelve Day War (Israel and Iran)   2025-06-13 2025-06-13            32.7        52.5        13             27           ISR             None
+ iran_2026_campaign         2026 Iran campaign begins   2026-02-28 2026-03-02            30.2       114.4        32           >=66           ISR             None
+  iran_2026_closure Strait of Hormuz closure declared   2026-03-04 2026-03-04            30.8       114.4        30           >=64           ISR             None

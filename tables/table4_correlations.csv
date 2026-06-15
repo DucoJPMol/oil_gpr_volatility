@@ -1,0 +1,10 @@
+sample,pair,correlation,n
+full_sample,gprd~brent_vol,0.1856,9887
+full_sample,gprd~wti_vol,0.2119,10138
+event_windows_pooled,gprd~brent_vol,0.4427,426
+gulf_war_1990,gprd~brent_vol,0.393,71
+iran_sanctions_2018,gprd~brent_vol,0.0101,71
+russia_ukraine_2022,gprd~brent_vol,-0.0222,71
+twelve_day_war_2025,gprd~brent_vol,0.1913,71
+iran_2026_campaign,gprd~brent_vol,0.2245,71
+iran_2026_closure,gprd~brent_vol,0.1601,71

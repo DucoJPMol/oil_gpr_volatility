@@ -175,6 +175,25 @@ def figure6(panel, cond, base):
     save(fig, 6, "garch_conditional_vol")
 
 
+def figure7():
+    """Local-projection impulse response of realized vol to a 1-SD GPRD shock."""
+    lp_path = config.TABLES / "table4_local_projection.csv"
+    if not lp_path.exists():
+        print("  fig7 skipped (run 04_regressions.py first)")
+        return
+    lp = pd.read_csv(lp_path)
+    fig, ax = plt.subplots(figsize=(9, 5.5))
+    ax.fill_between(lp["horizon"], lp["ci_low"], lp["ci_high"],
+                    color="#1b5e9b", alpha=0.2, label="95% CI")
+    ax.plot(lp["horizon"], lp["beta"], color="#1b5e9b", lw=1.8, label="Response")
+    ax.axhline(0, color="0.4", lw=0.9, ls=":")
+    ax.set_xlabel("Horizon (trading days after the GPRD shock)")
+    ax.set_ylabel("Response of realized vol (pp, per 1-SD GPRD shock)")
+    ax.set_title("Local-projection impulse response of Brent volatility to geopolitical risk")
+    ax.legend(loc="upper right", fontsize=9)
+    save(fig, 7, "local_projection_irf")
+
+
 def main():
     config.FIGURES.mkdir(parents=True, exist_ok=True)
     panel, event, base, cond = load()
@@ -184,6 +203,7 @@ def main():
     figure3(event, base)
     figure4(event)
     figure6(panel, cond, base)
+    figure7()
     print(f"Done. Figures in {config.FIGURES.relative_to(config.PROJECT_ROOT)}/")
 
 

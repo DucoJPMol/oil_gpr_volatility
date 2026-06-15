@@ -1,0 +1,5 @@
+                series     n     mean       sd     min      max
+      Brent log return  9907  0.00017  0.02541 -0.6437   0.4120
+        WTI log return 10178  0.00020  0.02696 -0.4064   0.4258
+Brent realized vol (%)  9887 33.89317 21.86418  5.6231 343.6016
+  WTI realized vol (%) 10138 35.98957 20.71636 10.3773 274.4155

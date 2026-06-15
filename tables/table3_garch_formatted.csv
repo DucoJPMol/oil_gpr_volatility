@@ -1,0 +1,9 @@
+parameter,estimate
+omega (constant),0.0613
+alpha (ARCH),0.0913
+beta (GARCH),0.902
+alpha+beta (persistence),0.9933
+log-likelihood,-21236.1901
+observations,9907.0
+Ljung-Box(10) resid p,0.0004
+Ljung-Box(10) sq resid p,0.5321

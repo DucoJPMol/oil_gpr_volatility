@@ -1,0 +1,8 @@
+,coef,se,t,p
+Intercept,67.615,4.5571,14.8373,0.0
+C(episode)[T.iran_2026_campaign],7.737,10.0404,0.7706,0.441
+C(episode)[T.iran_2026_closure],8.2693,9.6827,0.854,0.3931
+C(episode)[T.iran_sanctions_2018],-33.7992,5.3763,-6.2867,0.0
+C(episode)[T.russia_ukraine_2022],-8.7767,7.8096,-1.1238,0.2611
+C(episode)[T.twelve_day_war_2025],-30.7647,5.7212,-5.3773,0.0
+gprd_z,3.4629,2.6971,1.2839,0.1992
