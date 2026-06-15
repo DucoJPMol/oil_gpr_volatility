@@ -1,0 +1,7 @@
+            episode brent_10d brent_21d (main) brent_30d wti_10d wti_21d wti_30d
+      gulf_war_1990       100              178       187      29     164     169
+iran_sanctions_2018        20                2        76      23      21      86
+russia_ukraine_2022        59               61        64      43      58      63
+twelve_day_war_2025        17               27        36      15      23      30
+ iran_2026_campaign      >=66             >=66      >=66    >=68    >=68    >=68
+  iran_2026_closure      >=64             >=64      >=64    >=66    >=66    >=66
