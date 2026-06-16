@@ -90,7 +90,11 @@ GPR_DOWNLOAD_DATE = "2026-06-11"   # version of the GPR files in data/raw (updat
 # Saudi Arabia is the Gulf proxy. The overall daily GPRD is used regardless.
 # ----------------------------------------------------------------------
 GPR_COUNTRIES = ["ISR", "SAU", "RUS", "EGY", "TUR"]   # carried through to the processed panel
-GPR_IRAN_PROXY = "ISR"                                # nearest covered country; no GPRC_IRN exists
+# Saudi Arabia proxies the Iran episodes: there is no GPRC_IRN, and Israel
+# (Iran's adversary) carries Israel-specific risk that would confound the Iran
+# signal, so we use Saudi Arabia (an oil-exporting Gulf neighbour). Israel is
+# kept in GPR_COUNTRIES as a robustness comparison (see the proxy table).
+GPR_IRAN_PROXY = "SAU"
 
 # ----------------------------------------------------------------------
 # The five episodes. Dates are calendar dates; the code maps day zero to the

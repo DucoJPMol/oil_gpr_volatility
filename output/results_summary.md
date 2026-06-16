@@ -47,8 +47,11 @@ worth a sentence in the discussion.
 
 ## Things to flag in the write-up
 1. **Iran has no GPR country index.** Caldara–Iacoviello's 44-country set does
-   not include Iran, so the Iran-centric episodes use **Israel (GPRC_ISR)** as
-   the proxy, alongside the overall daily GPRD. State this.
+   not include Iran, so the Iran-centric episodes use **Saudi Arabia (GPRC_SAU)**
+   as the country proxy (Israel was rejected: as Iran's adversary it spikes far
+   harder — z = 6.3/10.0 in 2025/2026 vs 0.6/5.8 for Saudi — and would confound
+   the signal; Table 6). The headline results use the overall daily GPRD, so this
+   choice does not move the main numbers. State this.
 2. **Days-to-revert metric.** Because 21-day realized vol is backward-looking,
    the search for reversion starts at the spike onset (the first day vol crosses
    the threshold), not at day zero. This is a deliberate, documented choice on a

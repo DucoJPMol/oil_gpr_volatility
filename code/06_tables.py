@@ -98,6 +98,32 @@ def table3_garch_formatted() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def table6_iran_proxy_comparison() -> pd.DataFrame:
+    """Why Saudi Arabia, not Israel, proxies the Iran episodes: the trigger-month
+    z-scores of Israel's vs Saudi Arabia's country GPR (and overall GPR). Israel
+    tends to spike far harder, carrying Israel-specific risk; Saudi Arabia is the
+    cleaner oil-exporting-Gulf signal. (The headline results use the overall daily
+    GPRD, so this proxy choice does not move the main numbers.)"""
+    m = pd.read_csv(config.DATA_PROCESSED / "processed_gpr_monthly.csv",
+                    parse_dates=["month"]).set_index("month")
+    cols = ["gpr", "gprc_isr", "gprc_sau"]
+    z = {c: (m[c] - m[c].mean()) / m[c].std() for c in cols}
+    iran = ["iran_sanctions_2018", "twelve_day_war_2025",
+            "iran_2026_campaign", "iran_2026_closure"]
+    rows = []
+    for k in iran:
+        mo = pd.Timestamp(config.TRIGGERS[k]["date"]).to_period("M").to_timestamp()
+        if mo in m.index:
+            rows.append({
+                "episode": k,
+                "trigger_month": mo.date().isoformat(),
+                "GPR_z": round(z["gpr"][mo], 2),
+                "GPRC_ISR_z": round(z["gprc_isr"][mo], 2),
+                "GPRC_SAU_z": round(z["gprc_sau"][mo], 2),
+            })
+    return pd.DataFrame(rows)
+
+
 def main():
     config.TABLES.mkdir(parents=True, exist_ok=True)
     panel, event, base = load()
@@ -115,6 +141,12 @@ def main():
     if (config.TABLES / "table3_garch.csv").exists():
         t3 = table3_garch_formatted()
         write(t3, 3, "garch_formatted")
+
+    t6 = table6_iran_proxy_comparison()
+    print()
+    print("Iran proxy comparison (trigger-month country-GPR z-scores)")
+    print(t6.to_string(index=False))
+    write(t6, 6, "iran_proxy_comparison")
 
 
 if __name__ == "__main__":

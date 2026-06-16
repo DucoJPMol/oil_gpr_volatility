@@ -4,6 +4,21 @@ Four pointers from the mock presentation, turned into a step-by-step plan.
 Ordered quickest-win first. Each workstream lists: goal, data, code, outputs,
 and the decisions/risks to settle before starting.
 
+## Decisions confirmed + data findings (16 June 2026)
+- **A — Saudi proxy: CONFIRMED and DONE.** Proxy switched to `GPRC_SAU`; Table 6
+  added documenting why (Israel spikes z=6.3/10.0 vs Saudi 0.6/5.8 in 2025/2026).
+- **B — futures: CONFIRMED WTI-only.** EIA key still valid, but the WTI futures
+  series IDs need discovery (the petroleum/pri/fut route returned empty for the
+  guessed IDs) — first task of B.
+- **C — gas: go ahead, but as a STANDALONE context document**
+  (`output/global_unrest_gas.md`) framing global unrest during conflicts. Henry
+  Hub gas (`RNGWHHD`) is confirmed reachable on EIA; European TTF is not on EIA.
+- **D — reserves: focus on what happened when reserves ran dangerously low** and
+  how that fed oil prices and global volatility. **Add OVX** — but OVX (FRED
+  `OVXCLS`) is still blocked on this network (FRED and Yahoo both walled off), so
+  OVX needs a **manual browser download** (CBOE/Yahoo/investing.com) into
+  `data/raw`, like the GPR files. Build the loader to read that file.
+
 ## Shared prerequisite (do once, enables A/B/C)
 The EIA fetcher (`fetch_eia` in `01_get_and_clean_data.py`) is hardcoded to one
 route (`petroleum/pri/spt`). Generalise it to take a dataset route so we can pull

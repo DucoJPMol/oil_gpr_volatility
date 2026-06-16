@@ -20,9 +20,15 @@ covers the 1990 Gulf War.
 hand from matteoiacoviello.com/gpr.htm (file version dated 11 June 2026; the file
 updates monthly). The country-specific monthly indices are also used. The C&I
 country set covers 44 countries and does **not** include Iran (there is no
-`GPRC_IRN`, and the daily file has no country breakdown), so the Iran-centric
-episodes use Israel (`GPRC_ISR`) as the closest covered proxy alongside the
-overall daily `GPRD`; Russia (`GPRC_RUS`) covers the 2022 episode.
+`GPRC_IRN`, and the daily file has no country breakdown). The Iran-centric
+episodes use **Saudi Arabia (`GPRC_SAU`)** as the country proxy: Israel
+(`GPRC_ISR`) is Iran's adversary and spikes far harder around these episodes
+(trigger-month z-scores of 6.3 in 2025 and 10.0 in 2026 vs 0.6 and 5.8 for Saudi
+Arabia; Table 6), which would confound an "Iran geopolitical risk" measure, so
+Saudi Arabia is the cleaner oil-exporting-Gulf signal (Israel kept as a
+robustness comparison). Russia (`GPRC_RUS`) covers the 2022 episode. The headline
+results use the overall daily `GPRD`, not the country index, so the proxy choice
+does not move the main numbers.
 
 **Implied volatility (cross-check).** OVX, the CBOE Crude Oil Volatility Index
 (FRED `OVXCLS`, from 2007), is a secondary cross-check for the post-2007
