@@ -242,7 +242,7 @@ def figure12(event):
 
 def figure8():
     """Days-to-revert by episode, coloured by supply disruption (the mechanism)."""
-    dr_path = config.TABLES / "table2_days_to_revert.csv"
+    dr_path = config.DATA_PROCESSED / "days_to_revert.csv"
     if not dr_path.exists():
         print("  fig8 skipped (run 03_persistence.py first)")
         return

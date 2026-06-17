@@ -58,7 +58,7 @@ def table1_summary_stats(panel: pd.DataFrame) -> pd.DataFrame:
 
 
 def table2_event_summary(event: pd.DataFrame, base: pd.DataFrame) -> pd.DataFrame:
-    revert = pd.read_csv(config.TABLES / "table2_days_to_revert.csv")
+    revert = pd.read_csv(config.DATA_PROCESSED / "days_to_revert.csv")
     rbykey = revert.set_index("episode")
     rows = []
     for _, b in base.iterrows():
@@ -87,7 +87,7 @@ def table2_event_summary(event: pd.DataFrame, base: pd.DataFrame) -> pd.DataFram
 
 
 def table3_garch_formatted() -> pd.DataFrame:
-    raw = pd.read_csv(config.TABLES / "table3_garch.csv")
+    raw = pd.read_csv(config.DATA_PROCESSED / "garch_estimates.csv")
     val = dict(zip(raw["parameter"], raw["value"]))
     order = [("omega", "omega (constant)"), ("alpha", "alpha (ARCH)"),
              ("beta", "beta (GARCH)"), ("alpha+beta", "alpha+beta (persistence)"),
@@ -138,7 +138,7 @@ def main():
     print(t2.to_string(index=False))
     write(t2, 2, "event_summary")
 
-    if (config.TABLES / "table3_garch.csv").exists():
+    if (config.DATA_PROCESSED / "garch_estimates.csv").exists():
         t3 = table3_garch_formatted()
         write(t3, 3, "garch_formatted")
 

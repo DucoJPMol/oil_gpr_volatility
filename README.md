@@ -53,7 +53,7 @@ Set `EIA_API_KEY` first (see Setup), then run in order:
 1. `code/00_check_setup.py` — checks the environment, folders, and the EIA key.
 2. `code/01_get_and_clean_data.py` — pulls Brent/WTI from the EIA API, loads the GPR files, builds returns and the 21-day annualised volatility, and saves to `data/processed`. OVX/VIX are a best-effort FRED pull (skipped if FRED is unreachable). Re-runs use the cached pulls in `data/raw`; pass `--refresh` to force a fresh download.
 3. `code/02_event_windows.py` — builds the event panel and pre-event baselines.
-4. `code/03_persistence.py` — days-to-revert (Table 2) and GARCH(1,1) (Table 3).
+4. `code/03_persistence.py` — days-to-revert and GARCH(1,1) (writes working data to `data/processed`; the paper-ready Tables 2–3 are built by `06_tables.py`).
 5. `code/04_regressions.py` — correlations, the pooled event-window regression, and the local projection (Table 4).
 6. `code/05_figures.py` — Figures 1–7. `code/06_tables.py` — Tables 1–3.
 7. `code/07_robustness.py` — days-to-revert across Brent/WTI and 10/21/30-day vol windows (Table 5).

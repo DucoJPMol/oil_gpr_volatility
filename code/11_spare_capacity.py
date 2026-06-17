@@ -82,8 +82,8 @@ def main():
 
     # Per-episode spare capacity at the trigger month.
     rows = []
-    revert = pd.read_csv(config.TABLES / "table2_days_to_revert.csv").set_index("episode") \
-        if (config.TABLES / "table2_days_to_revert.csv").exists() else None
+    revert = pd.read_csv(config.DATA_PROCESSED / "days_to_revert.csv").set_index("episode") \
+        if (config.DATA_PROCESSED / "days_to_revert.csv").exists() else None
     for key, trig in config.TRIGGERS.items():
         mo = pd.Timestamp(trig["date"]).to_period("M").to_timestamp()
         if mo < spare.index.min() or mo > spare.index.max():

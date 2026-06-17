@@ -14,9 +14,9 @@ omega, alpha, beta and the sum alpha+beta (the persistence number), confirm
 alpha+beta < 1, save the conditional volatility series, and run Ljung-Box
 diagnostics on the standardised residuals and their squares.
 
-Output:
-  tables/table2_days_to_revert.csv
-  tables/table3_garch.csv
+Output (working data; the paper-ready Tables 2 and 3 are built by 06_tables.py):
+  data/processed/days_to_revert.csv
+  data/processed/garch_estimates.csv
   data/processed/processed_garch_condvol.csv
 
 Usage, from the project root:
@@ -147,14 +147,15 @@ def metric2(panel: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
 
 
 def main() -> None:
-    config.TABLES.mkdir(parents=True, exist_ok=True)
+    config.DATA_PROCESSED.mkdir(parents=True, exist_ok=True)
     panel, baselines = load_inputs()
 
     revert = metric1(panel, baselines)
     garch_table, condvol = metric2(panel)
 
-    revert_path = config.TABLES / "table2_days_to_revert.csv"
-    garch_path = config.TABLES / "table3_garch.csv"
+    # Working data (data/processed); the paper Tables 2 and 3 come from 06_tables.py.
+    revert_path = config.DATA_PROCESSED / "days_to_revert.csv"
+    garch_path = config.DATA_PROCESSED / "garch_estimates.csv"
     condvol_path = config.DATA_PROCESSED / "processed_garch_condvol.csv"
     revert.to_csv(revert_path, index=False)
     garch_table.to_csv(garch_path, index=False)
