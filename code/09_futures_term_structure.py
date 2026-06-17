@@ -79,11 +79,14 @@ def load_front_month(eia_c1: pd.Series) -> tuple[pd.Series, str]:
     manual_path = config.DATA_RAW / "raw_cl_futures.csv"
     if not manual_path.exists():
         return eia_c1, "EIA RCLC1 only (ends 2024-04; add data/raw/raw_cl_futures.csv for 2025/2026)"
-    m = pd.read_csv(manual_path)
-    # Yahoo CSV: Date + Close (use Adj Close/Close); be tolerant of column names.
-    date_col = next(c for c in m.columns if c.lower() in ("date", "period"))
-    close_col = next(c for c in m.columns if c.lower() in ("close", "adj close", "close*", "value"))
-    man = pd.Series(pd.to_numeric(m[close_col], errors="coerce").values,
+    # utf-8-sig strips the BOM that investing.com / Excel prepend.
+    m = pd.read_csv(manual_path, encoding="utf-8-sig")
+    m.columns = [c.strip().lstrip("﻿").lower() for c in m.columns]
+    # Tolerant of Yahoo (Date, Close/Adj Close) and investing.com (Date, Price).
+    date_col = next(c for c in m.columns if c in ("date", "period"))
+    close_col = next(c for c in m.columns if c in ("close", "adj close", "close*", "price", "value"))
+    vals = pd.to_numeric(m[close_col].astype(str).str.replace(",", ""), errors="coerce")
+    man = pd.Series(vals.values,
                     index=pd.to_datetime(m[date_col], errors="coerce")).dropna().sort_index()
     # Use EIA up to its end, then the manual series afterwards.
     cutoff = eia_c1.index.max()
