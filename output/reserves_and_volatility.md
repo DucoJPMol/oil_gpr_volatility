@@ -45,10 +45,33 @@ while that is happening. Whether a *second* spike follows full depletion is not
 something the current sample can establish (no episode fully exhausts the SPR),
 so frame it as a hypothesis, not a result.
 
+## The global buffer: OPEC spare capacity (Figure 15, Table 11)
+OPEC spare capacity is the cleaner buffer for *geopolitical* shocks — it is the
+world's ability to replace lost barrels. The unconditional correlation with vol
+is again weak (−0.03), but the per-episode picture is the most telling result in
+this whole extension:
+
+| Episode | OPEC spare capacity | Percentile | Days to revert |
+|---|---|---|---|
+| Iran sanctions 2018 | 1.65 mb/d | 22nd | 2 |
+| Russia–Ukraine 2022 | 1.88 mb/d | 27th | 61 |
+| Twelve-Day War 2025 | 3.05 mb/d | 52nd | 27 |
+| 2026 Iran campaign | 2.22 mb/d | 36th | ≥66 |
+| **2026 Strait closure** | **0.03 mb/d** | **0th** | ≥64 |
+
+The **2026 Strait closure** is the killer data point: spare capacity is
+effectively **zero** — when the Strait closes, OPEC's own Gulf buffer is trapped
+behind it, so there is nothing to offset the loss, and volatility stays elevated.
+
+The honest nuance: spare capacity only bites when there is an *actual*
+disruption. 2018 had thin spare capacity (22nd percentile) but reverted in 2 days
+because no barrels were lost (the Strait stayed open). So it is the **interaction**
+— a real disruption *and* a thin buffer — that drives persistence, not the buffer
+level alone. That interaction is the cleanest statement of the mechanism.
+
 ## Caveats
-- US-centric: commercial stocks and the SPR are US series; OECD inventories and
-  OPEC spare capacity (the global buffer) are in EIA's STEO dataset and are not
-  yet included — a natural next step.
+- US-centric inventory series; OECD commercial inventories (STEO) are a further
+  add. OPEC spare capacity (STEO `COPS_OPEC`) is now included (above).
 - Weekly inventory data aligned to daily vol by nearest week.
 - The reserve–vol relationship is confounded by demand shocks; do not overclaim.
 

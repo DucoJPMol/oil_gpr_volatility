@@ -1,0 +1,6 @@
+            episode trigger_month  opec_spare_mbd  spare_percentile days_to_revert
+iran_sanctions_2018    2018-05-01            1.65                22              2
+russia_ukraine_2022    2022-02-01            1.88                27             61
+twelve_day_war_2025    2025-06-01            3.05                52             27
+ iran_2026_campaign    2026-02-01            2.22                36           >=66
+  iran_2026_closure    2026-03-01            0.03                 0           >=64
