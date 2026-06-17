@@ -81,6 +81,20 @@ def realized_vol(price: pd.Series) -> pd.Series:
         * np.sqrt(config.TRADING_DAYS_PER_YEAR) * 100.0
 
 
+def load_ttf() -> pd.Series | None:
+    """European TTF gas, hand-downloaded from investing.com (Dutch TTF Natural
+    Gas Futures) to data/raw/raw_ttf.csv. None if not present."""
+    path = config.DATA_RAW / "raw_ttf.csv"
+    if not path.exists():
+        return None
+    m = pd.read_csv(path, encoding="utf-8-sig")
+    m.columns = [c.strip().lstrip("﻿").lower() for c in m.columns]
+    dcol = next(c for c in m.columns if c in ("date", "period"))
+    ccol = next(c for c in m.columns if c in ("price", "close", "adj close", "value"))
+    vals = pd.to_numeric(m[ccol].astype(str).str.replace(",", ""), errors="coerce")
+    return pd.Series(vals.values, index=pd.to_datetime(m[dcol], errors="coerce")).dropna().sort_index()
+
+
 def window(vol: pd.Series, trigger: str) -> pd.DataFrame:
     cal = vol.dropna().index
     trig = pd.Timestamp(trigger)
@@ -97,6 +111,10 @@ def window(vol: pd.Series, trigger: str) -> pd.DataFrame:
 def main():
     gas = fetch_gas()
     gas_vol = realized_vol(gas)
+    ttf = load_ttf()
+    ttf_vol = realized_vol(ttf) if ttf is not None else None
+    if ttf is not None:
+        print(f"  TTF (European gas) loaded: {len(ttf)} obs to {ttf.index.max().date()}")
     panel = pd.read_csv(config.DATA_PROCESSED / "processed_daily_panel.csv",
                         parse_dates=["date"]).set_index("date")
     oil_vol = panel["brent_vol"]
@@ -107,10 +125,16 @@ def main():
         ow, gw = window(oil_vol, trig["date"]), window(gas_vol, trig["date"])
         if ow.empty or gw.empty:
             continue
-        rows.append({"episode": key,
-                     "oil_peak_vol_%": round(ow["vol"].max(), 1),
-                     "gas_peak_vol_%": round(gw["vol"].max(), 1),
-                     "gas_over_oil": round(gw["vol"].max() / ow["vol"].max(), 2)})
+        row = {"episode": key,
+               "oil_peak_vol_%": round(ow["vol"].max(), 1),
+               "gas_peak_vol_%": round(gw["vol"].max(), 1),
+               "gas_over_oil": round(gw["vol"].max() / ow["vol"].max(), 2)}
+        if ttf_vol is not None:
+            tw = window(ttf_vol, trig["date"])
+            if not tw.empty:
+                row["ttf_peak_vol_%"] = round(tw["vol"].max(), 1)
+                row["ttf_over_oil"] = round(tw["vol"].max() / ow["vol"].max(), 2)
+        rows.append(row)
     table = pd.DataFrame(rows)
     config.TABLES.mkdir(parents=True, exist_ok=True)
     table.to_csv(config.TABLES / "table8_gas_vs_oil.csv", index=False)
@@ -123,15 +147,22 @@ def main():
     gw = window(gas_vol, config.TRIGGERS["russia_ukraine_2022"]["date"])
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(ow["event_day"], ow["vol"], color="#9467bd", lw=2.0, label="Brent oil vol")
-    ax.plot(gw["event_day"], gw["vol"], color="#d62728", lw=2.0, label="Henry Hub gas vol")
+    ax.plot(gw["event_day"], gw["vol"], color="#d62728", lw=2.0, label="Henry Hub gas vol (US)")
+    if ttf_vol is not None:
+        tw = window(ttf_vol, config.TRIGGERS["russia_ukraine_2022"]["date"])
+        if not tw.empty:
+            ax.plot(tw["event_day"], tw["vol"], color="#8c1a11", lw=2.0, ls="--",
+                    label="TTF gas vol (Europe)")
     ax.axvline(0, color="0.4", lw=1.0, ls=":")
     ax.set_xlabel("Event time (trading days; 0 = 24 Feb 2022)")
     ax.set_ylabel("21-day realized volatility (%, annualised)")
-    ax.set_title("Russia–Ukraine 2022: oil vs US natural-gas volatility")
+    ax.set_title("Russia–Ukraine 2022: oil vs natural-gas volatility")
     ax.legend(loc="upper left", fontsize=9)
-    fig.text(0.01, 0.01, "Source: EIA (Brent RBRTE, Henry Hub RNGWHHD), authors' "
-             "calculations. Henry Hub (US) understates the European TTF gas shock.",
-             fontsize=7.5, color="0.4")
+    note = ("Source: EIA (Brent RBRTE, Henry Hub RNGWHHD)"
+            + (", investing.com (Dutch TTF)" if ttf_vol is not None else "")
+            + ", authors' calculations."
+            + ("" if ttf_vol is not None else " Henry Hub (US) understates the European TTF shock."))
+    fig.text(0.01, 0.01, note, fontsize=7.5, color="0.4")
     fig.tight_layout(rect=(0, 0.03, 1, 1))
     config.FIGURES.mkdir(parents=True, exist_ok=True)
     for ext in ("png", "pdf"):
