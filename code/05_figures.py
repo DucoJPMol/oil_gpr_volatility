@@ -24,6 +24,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -215,6 +216,30 @@ def figure7():
     save(fig, 7, "local_projection_irf")
 
 
+def figure12(event):
+    """OVX (implied) vs realized vol for the post-2007 episodes OVX covers."""
+    post2007 = [k for k in EPISODE_STYLE
+                if event.loc[event.episode == k, "ovx"].notna().any()]
+    if not post2007:
+        print("  fig12 skipped (no OVX coverage)")
+        return
+    n = len(post2007)
+    fig, axes = plt.subplots(1, n, figsize=(3.4 * n, 4.5), sharey=True)
+    axes = np.atleast_1d(axes)
+    for ax, key in zip(axes, post2007):
+        color, label = EPISODE_STYLE[key]
+        g = event[event.episode == key]
+        ax.plot(g["event_day"], g["brent_vol"], color=color, lw=1.8, label="Realized vol")
+        ax.plot(g["event_day"], g["ovx"], color="0.35", lw=1.4, ls="--", label="OVX (implied)")
+        ax.axvline(0, color="0.6", lw=0.8, ls=":")
+        ax.set_title(label, fontsize=10)
+        ax.set_xlabel("Event day")
+    axes[0].set_ylabel("Volatility (%, annualised)")
+    axes[0].legend(loc="upper left", fontsize=8)
+    fig.suptitle("Implied (OVX) vs realized volatility around the post-2007 episodes", y=1.02)
+    save(fig, 12, "ovx_vs_realized")
+
+
 def figure8():
     """Days-to-revert by episode, coloured by supply disruption (the mechanism)."""
     dr_path = config.TABLES / "table2_days_to_revert.csv"
@@ -263,6 +288,7 @@ def main():
     figure6(panel, cond, base)
     figure7()
     figure8()
+    figure12(event)
     print(f"Done. Figures in {config.FIGURES.relative_to(config.PROJECT_ROOT)}/")
 
 

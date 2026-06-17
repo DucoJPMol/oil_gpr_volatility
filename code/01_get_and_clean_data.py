@@ -160,6 +160,15 @@ def get_oil_and_vol(refresh: bool = False) -> dict[str, pd.Series]:
 
     print("FRED volatility indices (cross-check; skipped if FRED is unreachable)")
     for name, series_id in config.FRED_SERIES.items():
+        # A hand-downloaded FRED CSV (e.g. data/raw/raw_ovx.csv) takes priority,
+        # since FRED is blocked on this network. Download it from
+        # fred.stlouisfed.org/series/<ID> and save as raw_<name>.csv.
+        manual = config.DATA_RAW / f"raw_{name}.csv"
+        if manual.exists():
+            s = _parse_fred_csv(manual.read_text(), series_id)
+            _report(name, series_id, s, "manual file")
+            out[name] = s.rename(name)
+            continue
         raw_path = config.DATA_RAW / f"raw_fred_{name}.csv"
         if raw_path.exists() and not refresh:
             s = _parse_fred_csv(raw_path.read_text(), series_id)

@@ -1,6 +1,7 @@
 sample,pair,correlation,n
 full_sample,gprd~brent_vol,0.1856,9887
 full_sample,gprd~wti_vol,0.2119,10138
+full_sample,gprd~ovx,0.1182,4802
 event_windows_pooled,gprd~brent_vol,0.4427,426
 gulf_war_1990,gprd~brent_vol,0.393,71
 iran_sanctions_2018,gprd~brent_vol,0.0101,71
