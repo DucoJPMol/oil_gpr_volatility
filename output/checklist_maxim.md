@@ -38,6 +38,14 @@ Place each with a number, caption, and the source note already on the figure.
 - [ ] Fig 6 `fig6_garch_conditional_vol` — GARCH conditional vol.
 - [ ] Fig 7 `fig7_local_projection_irf` — impulse response.
 - [ ] Fig 8 `fig8_days_to_revert_by_disruption` — the mechanism chart.
+- [ ] Fig 9 `fig9_oil_vs_gas_russia` — oil vs gas vol (Russia 2022).
+- [ ] Fig 10 `fig10_term_structure` — WTI C1−C4 futures spread.
+- [ ] Fig 11 `fig11_spot_vs_futures` — spot − front-month basis (incl. 2026).
+- [ ] Fig 12 `fig12_ovx_vs_realized` — implied (OVX) vs realized vol.
+- [ ] Fig 13 `fig13_reserves_vs_vol` — inventories vs vol.
+- [ ] Fig 14 `fig14_buffer_drawdown` — commercial + SPR buffer.
+- [ ] Fig 15 `fig15_spare_capacity_vs_vol` — OPEC spare capacity vs vol.
+- [ ] Decide which extension figures go in the main text vs an appendix.
 - [ ] Check every figure: 300 dpi, consistent font, axis labels with units, one
       colour per episode (consistent across all figures), source note present.
 
@@ -49,6 +57,10 @@ Place each with a number, caption, and the source note already on the figure.
       `table4_local_projection` — regression/correlation results.
 - [ ] Table 5 `table5_robustness_days_to_revert` — robustness.
 - [ ] Table 6 `table6_iran_proxy_comparison` — Saudi-vs-Israel proxy justification.
+- [ ] Table 8 `table8_gas_vs_oil` — gas vs oil peak vol per episode.
+- [ ] Table 9 `table9_term_structure` — futures spread / basis per episode.
+- [ ] Table 10 `table10_reserves_context` — inventories/SPR per episode.
+- [ ] Table 11 `table11_spare_capacity` — OPEC spare capacity per episode.
 - [ ] Reformat each into the document's table style; keep numbers identical to source.
 
 ## 4. Cross-referencing and consistency pass

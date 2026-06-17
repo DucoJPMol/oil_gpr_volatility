@@ -4,6 +4,13 @@ Four pointers from the mock presentation, turned into a step-by-step plan.
 Ordered quickest-win first. Each workstream lists: goal, data, code, outputs,
 and the decisions/risks to settle before starting.
 
+## STATUS (17 June 2026): all four workstreams DONE
+A (Saudi proxy), B (spot vs futures, spliced to 2026), C (gas / global unrest),
+D (reserves + OPEC spare capacity + OVX) are all built, with Figures 9–15 and
+Tables 6, 8–11, plus `global_unrest_gas.md` and `reserves_and_volatility.md`.
+Remaining optional: European TTF gas and VIX (loaders wired; need a manual
+download), and OECD commercial inventories (EIA STEO).
+
 ## Decisions confirmed + data findings (16 June 2026)
 - **A — Saudi proxy: CONFIRMED and DONE.** Proxy switched to `GPRC_SAU`; Table 6
   added documenting why (Israel spikes z=6.3/10.0 vs Saudi 0.6/5.8 in 2025/2026).

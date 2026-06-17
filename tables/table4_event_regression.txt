@@ -4,7 +4,7 @@ Dep. Variable:              brent_vol   R-squared:                       0.538
 Model:                            OLS   Adj. R-squared:                  0.532
 Method:                 Least Squares   F-statistic:                     22.44
 Date:                Wed, 17 Jun 2026   Prob (F-statistic):           6.04e-23
-Time:                        16:38:56   Log-Likelihood:                -1824.3
+Time:                        17:01:43   Log-Likelihood:                -1824.3
 No. Observations:                 426   AIC:                             3663.
 Df Residuals:                     419   BIC:                             3691.
 Df Model:                           6                                         

@@ -56,11 +56,28 @@ worth a sentence in the discussion.
    the search for reversion starts at the spike onset (the first day vol crosses
    the threshold), not at day zero. This is a deliberate, documented choice on a
    group-locked metric — confirm with the group.
-3. **OVX cross-check is pending.** OVX (post-2007 implied-vol comparator) is on
-   FRED, which was unreachable on our network; it fills in automatically when
-   `01` is run somewhere FRED is reachable. Oil prices come from EIA (identical
-   to FRED's Brent series).
+3. **OVX cross-check is in** (Figure 12): OVX implied vol vs realized vol for the
+   post-2007 episodes (downloaded manually from FRED; OVX leads realized vol in
+   2026). Oil prices come from EIA (identical to FRED's Brent series).
 4. **2026 is truncated/ongoing.** Both 2026 episodes are censored at the cutoff.
+
+## Extensions (post-presentation, Figures 9–15)
+- **Spot vs futures (Fig 11, Table 9):** in the 2026 disruption episodes WTI spot
+  trades **$2.5–$8 above front-month futures** (deep backwardation), vs ~0 in
+  calm periods — the longer a real disruption runs, the bigger the spot premium.
+  Gulf War flips contango→backwardation. (Futures spliced EIA + manual CL=F.)
+- **Gas / global unrest (Fig 9, Table 8):** gas volatility exceeds oil volatility
+  in every conflict episode (Russia 1.8×, 2025 2.5×, 2026 ~5.8×). Russia 2022 was
+  a gas-first shock. See `global_unrest_gas.md`. (Henry Hub; add TTF for Europe.)
+- **Reserves (Figs 13–15, Tables 10–11):** inventories do **not** predict vol
+  unconditionally (demand collapses build stocks during high-vol crashes). The
+  real story is the **buffer**: 2022 began with reserves low + record SPR release,
+  and the **2026 Strait closure had ~zero OPEC spare capacity** (0.03 mb/d, 0th
+  pct) — when the Strait closes, OPEC's Gulf buffer is trapped. The mechanism is
+  the *interaction* of a real disruption with a thin buffer. See
+  `reserves_and_volatility.md`.
+- **Iran proxy = Saudi Arabia, not Israel (Table 6):** Israel (Iran's adversary)
+  spikes far harder (z=6.3/10.0 vs 0.6/5.8), so Saudi is the cleaner proxy.
 
 ## Figure guide
 - Fig 1: GPR and Brent price, 1990–2026 (scene-setter).
@@ -70,3 +87,11 @@ worth a sentence in the discussion.
 - Fig 5: small multiples, vol vs GPRD per episode.
 - Fig 6: GARCH conditional vol over the sample.
 - Fig 7: local-projection impulse response with 95% bands.
+- Fig 8: days-to-revert by episode, coloured by supply disruption (mechanism).
+- Fig 9: Russia 2022 — oil vs gas volatility.
+- Fig 10: WTI futures term structure (C1−C4) around 1990/2018/2022.
+- Fig 11: spot − front-month futures basis around all episodes (incl. 2026).
+- Fig 12: implied (OVX) vs realized vol, post-2007 episodes.
+- Fig 13: US inventories (low-reserve shading) vs realized vol.
+- Fig 14: the US oil buffer — commercial inventories + SPR.
+- Fig 15: OPEC spare capacity vs realized vol (2026 closure ≈ zero).

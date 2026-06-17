@@ -131,3 +131,23 @@ whether barrels were actually lost (`strait_disrupted`, `supply_disruption` in
 `config.TRIGGERS`), the spine of the headline-versus-disruption argument. Each
 value requires a cited source; the 2026 codings are provisional pending
 verification.
+
+## Extensions (post-presentation)
+
+Additional data and measures, each in its own script (`code/08`–`11`):
+
+- **Futures term structure [`09`].** WTI futures from EIA (`RCLC1`–`RCLC4`, daily,
+  to 2024-04) spliced with a hand-downloaded front-month CL=F (investing.com,
+  `data/raw/raw_cl_futures.csv`) to extend through 2026. We build the C1−C4
+  spread (backwardation indicator) and the spot−front-month basis.
+- **Natural gas [`08`].** Henry Hub spot from EIA (`RNGWHHD`); European TTF
+  optional via a manual investing.com download (`raw_ttf.csv`). Gas realized vol
+  uses the same 21-day method.
+- **Inventories [`10`].** US commercial crude stocks excl. SPR (EIA `WCESTUS1`),
+  SPR (`WCSSTUS1`), total (`WCRSTUS1`), weekly. Reserve adequacy = deviation of
+  commercial stocks from their trailing 5-year mean, in SD units.
+- **OPEC spare capacity [`11`].** EIA STEO `COPS_OPEC` (monthly), the global
+  supply buffer.
+- **Implied volatility.** OVX (`OVXCLS`) and VIX (`VIXCLS`) are hand-downloaded
+  from FRED into `data/raw/raw_ovx.csv` / `raw_vix.csv` (FRED is blocked on our
+  network) and loaded with priority over the API pull.

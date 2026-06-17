@@ -64,12 +64,17 @@ Write it in this order; each bullet maps to an artifact.
       stayed open → 27), 2026 (closure → still elevated).
 - [ ] **The headline figure:** explain Figure 4 — same region, same kind of trigger,
       opposite persistence, because in 2026 the Strait actually closed.
-- [ ] **Reserves / spare-capacity angle** (from the reserves extension, Workstream D):
-      discuss how buffers dampen the price/vol response and what happens when they run
-      low — the "second spike" idea. *(Pending — coordinate with Duco on timing.)*
-- [ ] **Gas vs oil for Russia** (from the gas context document): acknowledge the 2022
-      shock was largely a gas event; cite `output/global_unrest_gas.md` for depth.
-      *(Pending.)*
+- [ ] **Spot vs futures** (Fig 11, Table 9): in 2026 disruption episodes WTI spot
+      trades $2.5–8 above front-month futures (backwardation) — the market prices
+      near-term scarcity the longer the conflict runs.
+- [ ] **Reserves / spare-capacity angle** (Figs 13–15, Tables 10–11,
+      `reserves_and_volatility.md`): inventories don't predict vol unconditionally;
+      the story is the buffer — 2022's record SPR release and the 2026 Strait
+      closure with ~zero OPEC spare capacity. Frame the "second spike" as a
+      hypothesis, not a result. The mechanism is disruption × thin buffer.
+- [ ] **Gas vs oil for Russia** (Fig 9, Table 8, `output/global_unrest_gas.md`):
+      the 2022 shock was largely a gas event; gas vol exceeds oil vol in every
+      conflict episode (Russia 1.8×).
 
 ## 3. Limitations (write these explicitly — graded)
 - [ ] OVX implied-vol cross-check is pending (FRED was unreachable on our network).
