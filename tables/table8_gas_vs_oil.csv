@@ -1,6 +1,6 @@
-episode,oil_peak_vol_%,gas_peak_vol_%,gas_over_oil
-iran_sanctions_2018,37.6,36.3,0.97
-russia_ukraine_2022,90.5,164.6,1.82
-twelve_day_war_2025,52.5,132.2,2.52
-iran_2026_campaign,114.4,662.3,5.79
-iran_2026_closure,114.4,662.0,5.79
+episode,oil_peak_vol_%,gas_peak_vol_%,gas_over_oil,ttf_peak_vol_%,ttf_over_oil
+iran_sanctions_2018,37.6,36.3,0.97,35.1,0.93
+russia_ukraine_2022,90.5,164.6,1.82,301.5,3.33
+twelve_day_war_2025,52.5,132.2,2.52,65.4,1.25
+iran_2026_campaign,114.4,662.3,5.79,165.4,1.45
+iran_2026_closure,114.4,662.0,5.79,165.4,1.45

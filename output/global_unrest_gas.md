@@ -16,35 +16,35 @@ response is larger than the oil response.
 ## What the data show (Henry Hub, EIA)
 Peak 21-day realized volatility in the −10/+60 window, gas vs oil (`table8_gas_vs_oil`):
 
-| Episode | Oil peak vol | Gas peak vol | Gas ÷ Oil |
-|---|---|---|---|
-| Iran sanctions 2018 | 38% | 36% | 0.97 |
-| Russia–Ukraine 2022 | 91% | 165% | **1.82** |
-| Twelve-Day War 2025 | 53% | 132% | 2.52 |
-| 2026 Iran campaign | 114% | 662% | 5.79 |
-| 2026 Strait closure | 114% | 662% | 5.79 |
+| Episode | Oil peak vol | Henry Hub (US) | × oil | TTF (Europe) | × oil |
+|---|---|---|---|---|---|
+| Iran sanctions 2018 | 38% | 36% | 0.97 | 35% | 0.93 |
+| Russia–Ukraine 2022 | 91% | 165% | 1.82 | **301%** | **3.33** |
+| Twelve-Day War 2025 | 53% | 132% | 2.52 | 65% | 1.25 |
+| 2026 Iran campaign | 114% | 662% | 5.79 | 165% | 1.45 |
+| 2026 Strait closure | 114% | 662% | 5.79 | 165% | 1.45 |
 
 Gas volatility exceeds oil volatility in every conflict-driven episode, often by a
-wide margin. (Gulf War 1990 is excluded — Henry Hub data begin in 1997.)
+wide margin. (Gulf War 1990 is excluded — gas data begin in 1997/2010.)
 
 ## Russia–Ukraine 2022: a gas shock first, an oil shock second
 This is the key case for the discussion. The 2022 episode is commonly framed as an
 oil event, but Russia is a far larger player in *gas*, and the shock landed hardest
-there. Figure 9 (`fig9_oil_vs_gas_russia`) shows gas volatility already elevated
-*going into* the invasion — the European gas crisis had been building since late
-2021 — while oil volatility rose afterward. The implication for the paper: Russia
-belongs in the sample as a major-exporter sanctions shock, but its primary
-transmission was through gas, and our oil-only persistence number for 2022 (61
-days) should be read with that caveat.
+there. Figure 9 (`fig9_oil_vs_gas_russia`) makes it unmistakable: **European TTF
+gas volatility spiked to ~300% — 3.3× the oil response (91%)** — and was already
+elevated going into the invasion (the European gas crisis had built since late
+2021). US Henry Hub rose too (1.8× oil) but far less, because the US is relatively
+insulated. The implication for the paper: Russia belongs in the sample as a
+major-exporter shock, but its primary transmission was through **European gas**,
+and the oil-only persistence number for 2022 (61 days) should be read with that
+in mind.
 
-## Important caveat — Henry Hub understates it
-Henry Hub is the **US** benchmark, and the US is relatively insulated (a net
-exporter with its own production). The 2022 Russian shock actually hit hardest in
-**European TTF** gas, which spiked far more than Henry Hub. TTF is **not available
-on the EIA API**, so we proxy with Henry Hub and flag that it *understates* the
-true European gas disruption. If the group wants the full picture, TTF would need
-a separate data source (ICE / Refinitiv / a manual download). Gas markets are
-regional, so this regional caveat matters.
+## Regional gas markets
+Henry Hub (US) and TTF (Europe) diverge sharply in 2022 (1.8× vs 3.3× oil),
+confirming gas is a *regional* market: the Russian shock hit Europe hardest. Both
+are now included (Henry Hub from EIA `RNGWHHD`; TTF hand-downloaded from
+investing.com to `data/raw/raw_ttf.csv`). Interestingly, for the 2026 episodes US
+Henry Hub is the more volatile of the two — a separate, US-centric gas episode.
 
 ## How to use this in the paper
 - A discussion paragraph supporting the "global unrest" framing: conflicts raise
